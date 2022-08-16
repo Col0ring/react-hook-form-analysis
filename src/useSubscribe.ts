@@ -8,11 +8,16 @@ type Props<T> = {
   callback: (value: T) => void;
 };
 
+/**
+ * 通过 subject 来 subscribe callback
+ * @param props
+ */
 export function useSubscribe<T>(props: Props<T>) {
   const _props = React.useRef(props);
   _props.current = props;
 
   React.useEffect(() => {
+    // 关闭 subscribe
     const tearDown = (subscription: Subscription | false) => {
       if (subscription) {
         subscription.unsubscribe();

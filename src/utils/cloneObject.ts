@@ -2,6 +2,11 @@ import isFunction from './isFunction';
 import isObject from './isObject';
 import isWeb from './isWeb';
 
+/**
+ * 如果是对象，使用对象的副本
+ * @param data
+ * @returns
+ */
 export default function cloneObject<T>(data: T): T {
   let copy: any;
   const isArray = Array.isArray(data);

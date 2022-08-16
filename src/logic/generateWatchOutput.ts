@@ -5,7 +5,9 @@ import isString from '../utils/isString';
 export default (
   names: string | string[] | undefined,
   _names: Names,
+  // 当前的 from 的 values 值
   formValues?: FieldValues,
+  // 全局的 watch 会把字段名添加到 _names 的 watch 集合中
   isGlobal?: boolean,
 ) => {
   const isArray = Array.isArray(names);
@@ -23,6 +25,7 @@ export default (
     );
   }
 
+  // 如果上面都没匹配上，证明 _names 正在 watchAll
   isGlobal && (_names.watchAll = true);
   return formValues;
 };

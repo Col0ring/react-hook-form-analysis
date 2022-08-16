@@ -194,7 +194,7 @@ export function useWatch<TFieldValues extends FieldValues>(
     subject: control._subjects.watch,
     callback,
   });
-
+  // 默认也是使用 _getWatch，注意这里没有传入 isGlobal，不会将其加载全局的 _names.watch 监听中，将其与全局的 watch 分离开，只放在了 hook 内部，对外层影响更小
   const [value, updateValue] = React.useState<unknown>(
     isUndefined(defaultValue)
       ? control._getWatch(name as InternalFieldName)

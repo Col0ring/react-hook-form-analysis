@@ -3,6 +3,12 @@ import { get } from '../utils';
 import isObject from '../utils/isObject';
 import isUndefined from '../utils/isUndefined';
 
+/**
+ * 调用 ref 的 focus 方法聚焦，对第一个错误聚焦
+ * @param fields
+ * @param callback
+ * @param fieldsNames
+ */
 const focusFieldBy = (
   fields: FieldRefs,
   callback: (name: string) => boolean,

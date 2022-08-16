@@ -3,6 +3,7 @@ import { BrowserNativeObject, Primitive } from '../utils';
 
 import { ArrayKey, IsTuple, TupleKeys } from './common';
 
+// 这里处理可以和 rc-field-form 做对比，个人感觉不如 rc-field-form
 /**
  * Helper type for recursively constructing paths through a type.
  * See {@link Path}

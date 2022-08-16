@@ -12,6 +12,7 @@ export default <TFieldValues extends FieldValues>(
   for (const key in formState) {
     Object.defineProperty(result, key, {
       get: () => {
+        // 做依赖收集
         const _key = key as keyof FormState<TFieldValues> & keyof ReadFormState;
 
         if (_proxyFormState[_key] !== VALIDATION_MODE.all) {

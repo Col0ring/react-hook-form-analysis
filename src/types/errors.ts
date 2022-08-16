@@ -38,10 +38,14 @@ export type FieldErrorsImpl<T extends FieldValues = FieldValues> = {
     : FieldError;
 };
 
+/**
+ * errors，是一个包含 form 字段的对象 { xxx: object }
+ */
 export type FieldErrors<T extends FieldValues = FieldValues> = FieldErrorsImpl<
   DeepRequired<T>
 >;
 
+// 内部无法获取到具体的 form 自动，所以直接 string 做兼容
 export type InternalFieldErrors = Partial<
   Record<InternalFieldName, FieldError>
 >;

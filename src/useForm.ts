@@ -46,11 +46,13 @@ export function useForm<
   TFieldValues extends FieldValues = FieldValues,
   TContext = any,
 >(
+  // TFieldValues 在外部用户自己传入
   props: UseFormProps<TFieldValues, TContext> = {},
 ): UseFormReturn<TFieldValues, TContext> {
   const _formControl = React.useRef<
     UseFormReturn<TFieldValues, TContext> | undefined
   >();
+  // formState 实时更新
   const [formState, updateFormState] = React.useState<FormState<TFieldValues>>({
     isDirty: false,
     isValidating: false,
@@ -64,6 +66,7 @@ export function useForm<
     errors: {} as FieldErrors<TFieldValues>,
   });
 
+  // 保证 formControl 不重复渲染
   if (_formControl.current) {
     _formControl.current.control._options = props;
   } else {
@@ -73,8 +76,12 @@ export function useForm<
     };
   }
 
+  // control 不会改变地址
   const control = _formControl.current.control;
 
+  /**
+   * 当 subject 更新值时调用
+   */
   const callback = React.useCallback(
     (value: FieldValues) => {
       if (shouldRenderFormState(value, control._proxyFormState, true)) {
@@ -83,29 +90,39 @@ export function useForm<
           ...value,
         };
 
+        // 更新 fromState
         updateFormState({ ...control._formState });
       }
     },
     [control],
   );
 
+  /**
+   * 所有使用 useForm 的表单最外层都会监听 state，此值改变整个表单状态都会改变，watch 性能更差也是因为间距会发布 state 的更新导致这里更新
+   */
   useSubscribe({
     subject: control._subjects.state,
     callback,
   });
 
+  // 每次渲染的时候都会触发
   React.useEffect(() => {
+    // 如果没有挂载，就挂载
     if (!control._stateFlags.mount) {
+      // 挂载的同时验证表单
       control._proxyFormState.isValid && control._updateValid();
       control._stateFlags.mount = true;
     }
+    // 如果 shouldUnregister 为 true 会触发这里
     if (control._stateFlags.watch) {
       control._stateFlags.watch = false;
       control._subjects.state.next({});
     }
+    // 每次渲染都会判断溢出没有 mount 的表单项
     control._removeUnmounted();
   });
 
+  // 使用 proxy 代理 fromState
   _formControl.current.formState = getProxyFormState(
     formState,
     control._proxyFormState,

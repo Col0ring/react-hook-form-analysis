@@ -55,6 +55,7 @@ export type ValidationMode = {
 
 export type Mode = keyof ValidationMode;
 
+// 校验失败的错误抛出
 export type CriteriaMode = 'firstError' | 'all';
 
 export type SubmitHandler<TFieldValues extends FieldValues> = (
@@ -86,6 +87,7 @@ export type DelayCallback = (wait: number) => void;
 
 export type UseFormProps<
   TFieldValues extends FieldValues = FieldValues,
+  // 用户想要给 resolver 或者 yup 的上下文对象（用作表单验证）
   TContext = any,
 > = Partial<{
   mode: Mode;
@@ -94,6 +96,9 @@ export type UseFormProps<
   resolver: Resolver<TFieldValues, TContext>;
   context: TContext;
   shouldFocusError: boolean;
+  /**
+   * 默认为 false，会保存原来的 input 值，但是不会校验它，同时在提交时会 merge default Value，如果为 true，则更接近原生表单，提交时只会查找对应的表单项
+   */
   shouldUnregister: boolean;
   shouldUseNativeValidation: boolean;
   criteriaMode: CriteriaMode;
@@ -117,6 +122,7 @@ export type FormStateProxy<TFieldValues extends FieldValues = FieldValues> = {
 export type ReadFormState = { [K in keyof FormStateProxy]: boolean | 'all' };
 
 export type FormState<TFieldValues extends FieldValues> = {
+  // 是否修改了值，如果值为默认值则不算
   isDirty: boolean;
   dirtyFields: FieldNamesMarkedBoolean<TFieldValues>;
   isSubmitted: boolean;

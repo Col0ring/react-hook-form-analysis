@@ -2,6 +2,9 @@ import { VALIDATION_MODE } from '../constants';
 import { ReadFormState } from '../types';
 import isEmptyObject from '../utils/isEmptyObject';
 
+/**
+ * 是否重新刷新组件
+ */
 export default <T extends Record<string, any>, K extends ReadFormState>(
   formStateData: T,
   _proxyFormState: K,

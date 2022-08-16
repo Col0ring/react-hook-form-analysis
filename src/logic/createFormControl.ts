@@ -83,21 +83,31 @@ import updateFieldArrayRootError from './updateFieldArrayRootError';
 import validateField from './validateField';
 
 const defaultOptions = {
+  // 验证时机，默认只有提交时才验证表单
   mode: VALIDATION_MODE.onSubmit,
+  // 重新验证表单
   reValidateMode: VALIDATION_MODE.onChange,
+  // 聚焦第一个表单的报错，浏览器的行为则会跳转到比如对应 input 的位置
   shouldFocusError: true,
 } as const;
 
+/**
+ * 核心逻辑，创建 form 的控制器
+ * @param props
+ * @returns
+ */
 export function createFormControl<
   TFieldValues extends FieldValues = FieldValues,
   TContext = any,
 >(
   props: UseFormProps<TFieldValues, TContext> = {},
+  // 下面的 fromState 由外部提供
 ): Omit<UseFormReturn<TFieldValues, TContext>, 'formState'> {
   let _options = {
     ...defaultOptions,
     ...props,
   };
+  // 内部的 formState
   let _formState: FormState<TFieldValues> = {
     isDirty: false,
     isValidating: false,
@@ -112,14 +122,17 @@ export function createFormControl<
   };
   let _fields = {};
   let _defaultValues = cloneObject(_options.defaultValues) || {};
+  // 如果 shouldUnregister，证明是原生表单行为，没有默认值
   let _formValues = _options.shouldUnregister
     ? {}
     : cloneObject(_defaultValues);
+  // 状态 flag
   let _stateFlags = {
     action: false,
     mount: false,
     watch: false,
   };
+  // 保存相关状态的 set 集合
   let _names: Names = {
     mount: new Set(),
     unMount: new Set(),
@@ -128,6 +141,7 @@ export function createFormControl<
   } as Names;
   let delayErrorCallback: DelayCallback | null;
   let timer = 0;
+  // 正在校验中的表单
   let validateFields: Record<InternalFieldName, number> = {};
   const _proxyFormState = {
     isDirty: false,
@@ -143,11 +157,15 @@ export function createFormControl<
     state: createSubject(),
   };
 
+  // Submit 前的 mode
   const validationModeBeforeSubmit = getValidationModes(_options.mode);
+  // Submit 后的 mode
   const validationModeAfterSubmit = getValidationModes(_options.reValidateMode);
+  // 是否展示所有错误，默认是 firstError，第一个错误
   const shouldDisplayAllAssociatedErrors =
     _options.criteriaMode === VALIDATION_MODE.all;
 
+  // 防抖
   const debounce =
     <T extends Function>(callback: T) =>
     (wait: number) => {
@@ -463,6 +481,7 @@ export function createFormControl<
     return context.valid;
   };
 
+  // 移除没有挂在的表单项
   const _removeUnmounted = () => {
     for (const name of _names.unMount) {
       const field: Field = get(_fields, name);
@@ -482,6 +501,13 @@ export function createFormControl<
     !deepEqual(getValues(), _defaultValues)
   );
 
+  /**
+   * 获取监听值
+   * @param names
+   * @param defaultValue
+   * @param isGlobal
+   * @returns
+   */
   const _getWatch: WatchInternal<TFieldValues> = (
     names,
     defaultValue,
@@ -511,6 +537,12 @@ export function createFormControl<
       ),
     );
 
+  /**
+   * 更新字段值，直接通过改变 Ref 来更新值
+   * @param name
+   * @param value
+   * @param options
+   */
   const setFieldValue = (
     name: InternalFieldName,
     value: SetFieldValue<TFieldValues>,
@@ -629,7 +661,7 @@ export function createFormControl<
         options.shouldDirty
       ) {
         _formState.dirtyFields = getDirtyFields(_defaultValues, _formValues);
-
+        // 通知更新状态
         _subjects.state.next({
           name,
           dirtyFields: _formState.dirtyFields,
@@ -642,6 +674,7 @@ export function createFormControl<
         : setFieldValue(name, cloneValue, options);
     }
 
+    // 如果有使用 watch，更新全局状态（因为没有局部监听器，只能更新全局的状态）
     isWatched(name, _names) && _subjects.state.next({});
     _subjects.watch.next({
       name,
@@ -753,6 +786,12 @@ export function createFormControl<
     }
   };
 
+  /**
+   * 错误验证，抛出错误
+   * @param name
+   * @param options
+   * @returns
+   */
   const trigger: UseFormTrigger<TFieldValues> = async (name, options = {}) => {
     let isValid;
     let validationResult;
@@ -864,6 +903,7 @@ export function createFormControl<
     options && options.shouldFocus && ref && ref.focus && ref.focus();
   };
 
+  // 传入非 function 的值会直接返回 watch 的值，但是每次渲染的时候都会调用
   const watch: UseFormWatch<TFieldValues> = (
     name?:
       | FieldPath<TFieldValues>
@@ -872,7 +912,8 @@ export function createFormControl<
     defaultValue?: unknown,
   ) =>
     isFunction(name)
-      ? _subjects.watch.subscribe({
+      ? // _subjects 的 watch 在这里监听
+        _subjects.watch.subscribe({
           next: (info) =>
             name(
               _getWatch(undefined, defaultValue as DeepPartial<TFieldValues>),
@@ -1173,6 +1214,7 @@ export function createFormControl<
     _stateFlags.mount =
       !_proxyFormState.isValid || !!keepStateOptions.keepIsValid;
 
+    // 是否监听原来的值
     _stateFlags.watch = !!props.shouldUnregister;
 
     _subjects.state.next({
@@ -1210,6 +1252,7 @@ export function createFormControl<
     const field = get(_fields, name)._f;
     const fieldRef = field.refs ? field.refs[0] : field.ref;
     fieldRef.focus();
+    // 选择 input content
     options.shouldSelect && fieldRef.select();
   };
 

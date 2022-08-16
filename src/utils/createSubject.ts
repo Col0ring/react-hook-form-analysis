@@ -1,5 +1,9 @@
 import { Noop } from '../types';
 
+/**
+ * 感觉参考自 Rxjs
+ */
+
 export type Observer<T> = {
   next: (value: T) => void;
 };
@@ -13,7 +17,10 @@ export type Subject<T> = {
   subscribe: (value: Observer<T>) => Subscription;
   unsubscribe: Noop;
 } & Observer<T>;
-
+/**
+ * 类似 rxjs 的 subject，内部是一套发布订阅模式
+ * @returns
+ */
 export default function createSubject<T>(): Subject<T> {
   let _observers: Observer<T>[] = [];
 
