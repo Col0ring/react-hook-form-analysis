@@ -122,6 +122,7 @@ export function createFormControl<
   };
   let _fields = {};
   let _defaultValues = cloneObject(_options.defaultValues) || {};
+  // _formValues 用于存储当前 field 字段中保留的所有值
   // 如果 shouldUnregister，证明是原生表单行为，没有默认值
   let _formValues = _options.shouldUnregister
     ? {}
@@ -681,6 +682,11 @@ export function createFormControl<
     });
   };
 
+  /**
+   * 受控组件会传入 value 进来
+   * @param event
+   * @returns
+   */
   const onChange: ChangeHandler = async (event) => {
     const target = event.target;
     let name = target.name;
@@ -689,6 +695,7 @@ export function createFormControl<
     if (field) {
       let error;
       let isValid;
+      // 受控组件没有 target.type，会跑到下面获取值
       const fieldValue = target.type
         ? getFieldValue(field._f)
         : getEventValue(event);
@@ -847,6 +854,11 @@ export function createFormControl<
     return validationResult;
   };
 
+  /**
+   * 外部用户获取值，主要就是从 _formValues 里面拿
+   * @param fieldNames
+   * @returns
+   */
   const getValues: UseFormGetValues<TFieldValues> = (
     fieldNames?:
       | FieldPath<TFieldValues>

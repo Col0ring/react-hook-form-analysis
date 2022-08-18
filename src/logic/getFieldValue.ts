@@ -9,6 +9,11 @@ import getCheckboxValue from './getCheckboxValue';
 import getFieldValueAs from './getFieldValueAs';
 import getRadioValue from './getRadioValue';
 
+/**
+ * 从 ref 上获取 Value 的值
+ * @param _f
+ * @returns
+ */
 export default function getFieldValue(_f: Field['_f']) {
   const ref = _f.ref;
 

@@ -4,6 +4,13 @@ import isKey from './isKey';
 import isObject from './isObject';
 import stringToPath from './stringToPath';
 
+/**
+ * 直接修改传入的 object 的值
+ * @param object
+ * @param path
+ * @param value
+ * @returns
+ */
 export default function set(
   object: FieldValues,
   path: string,

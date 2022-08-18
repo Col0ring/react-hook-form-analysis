@@ -19,6 +19,7 @@ import { useFormState } from './useFormState';
 import { useWatch } from './useWatch';
 
 /**
+ * 使用 useController 控制受控组件修改值时会刷新组件的，性能不如原生 ref 获取值
  * Custom hook to work with controlled component, this function provide you with both form and field level state. Re-render is isolated at the hook level.
  *
  * @remarks
@@ -51,6 +52,7 @@ export function useController<
   const methods = useFormContext<TFieldValues>();
   const { name, control = methods.control, shouldUnregister } = props;
   const isArrayField = isNameInFieldArray(control._names.array, name);
+  // 受控组件的 value 通过 watch 值的改变来刷新
   const value = useWatch({
     control,
     name,
@@ -102,9 +104,12 @@ export function useController<
     field: {
       name,
       value,
+      // 同时受控表单 onChange 逻辑
       onChange: React.useCallback(
         (event) => {
+          // 包装 onChange 触发功能
           _registerProps.current.onChange({
+            // 下面的包装 react-hook-form 在解析时会做判断，走到受控组件的判断逻辑中，解析 event
             target: {
               value: getEventValue(event),
               name: name as InternalFieldName,
@@ -140,7 +145,9 @@ export function useController<
         [name, control._fields],
       ),
     },
+    // 整体的表单状态
     formState,
+    // 当前表单项状态
     fieldState: Object.defineProperties(
       {},
       {
