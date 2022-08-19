@@ -972,6 +972,12 @@ export function createFormControl<
     !options.keepIsValid && _updateValid();
   };
 
+  /**
+   * 注册相关表单字段
+   * @param name
+   * @param options
+   * @returns
+   */
   const register: UseFormRegister<TFieldValues> = (name, options = {}) => {
     let field = get(_fields, name);
     const disabledIsDefined = isBoolean(options.disabled);
@@ -1067,6 +1073,12 @@ export function createFormControl<
     };
   };
 
+  /**
+   * 拦截表单校验
+   * @param onValid
+   * @param onInvalid
+   * @returns
+   */
   const handleSubmit: UseFormHandleSubmit<TFieldValues> =
     (onValid, onInvalid) => async (e) => {
       if (e) {
