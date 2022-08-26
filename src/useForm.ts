@@ -122,7 +122,7 @@ export function useForm<
     control._removeUnmounted();
   });
 
-  // 使用 proxy 代理 fromState
+  // 代理 fromState，内部做依赖收集
   _formControl.current.formState = getProxyFormState(
     formState,
     control._proxyFormState,
